@@ -7,6 +7,6 @@
     ```
 - Usage:
     ```
-    401\_abdullin/bin/Debug/net5.0/401\_abdullin imagesDir
+    401_abdullin/bin/Debug/net5.0/401_abdullin imagesDir
 
     ```
