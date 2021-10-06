@@ -9,7 +9,12 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        string dir = Console.ReadLine();
+        if (args.Length != 1)
+        {
+            Console.Error.WriteLine("Usage: %program_name% imageDirectory");
+            Environment.Exit(1);
+        }
+        string dir = args[0];
         ImageClassifier imageClassifierModel = new ImageClassifier(dir);
         await foreach (Tuple<string, List<YoloV4Result>> imgRes in
                        imageClassifierModel.ProcessDirectoryContentsAsync())
