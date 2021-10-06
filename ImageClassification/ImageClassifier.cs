@@ -3,12 +3,13 @@ using System.IO;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using YOLOv4MLNet.DataStructures;
 
 
 public class ImageClassifier
 {
     private string dir;
-    private Task<string>[] tasks;
+    private Task<Tuple<string, List<YoloV4Result>>>[] tasks;
     private CancellationTokenSource cts = new CancellationTokenSource();
 
     public ImageClassifier(string dir)
@@ -16,17 +17,20 @@ public class ImageClassifier
         this.dir = dir;
     }
 
-    private Task<string>[] CreateTasks()
+    private Task<Tuple<string, List<YoloV4Result>>>[] CreateTasks()
     {
         string[] files = Directory.GetFiles(dir);
-        tasks = new Task<string>[files.Length];
+        tasks = new Task<Tuple<string, List<YoloV4Result>>>[files.Length];
         for (int i = 0; i < files.Length; i++)
         {
-            Task<string> task = Task.Factory.StartNew(iCopy =>
+            Task<Tuple<string, List<YoloV4Result>>> task = Task.Factory.StartNew(iCopy =>
             {
                 int idx = (int) iCopy;
                 string file = files[idx];
-                return file;
+                float[] bbox = {1f, 2f, 3f, 4f};
+                List<YoloV4Result> res = new List<YoloV4Result>
+                    {new YoloV4Result(bbox, "banana", 0.5f)};
+                return Tuple.Create(file, res);
             }, i, cts.Token);
             tasks[i] = task;
         }
@@ -34,7 +38,7 @@ public class ImageClassifier
     }
 
     // Process tasks as they complete
-    public async IAsyncEnumerable<string> ProcessDirectoryContentsAsync()
+    public async IAsyncEnumerable<Tuple<string, List<YoloV4Result>>> ProcessDirectoryContentsAsync()
     {
         CreateTasks();
         foreach (var bucket in Interleaved(tasks))
